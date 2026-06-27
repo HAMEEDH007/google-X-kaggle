@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiMind - Multimodal Procurement Audit Command Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Sans / Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-shield-halved text-xl animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">LogiMind Audit Command Center</h1>
+                <p class="text-xs text-slate-400 font-medium">Autonomous Procurement Ingestion & Verification Pipeline</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="api-status" class="flex items-center space-x-1.5 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-xs">
+                <span class="w-2 h-2 rounded-full bg-red-500" id="status-indicator"></span>
+                <span id="status-text" class="text-slate-300 font-medium">Checking Connection...</span>
+            </span>
+            <div class="bg-slate-800 text-xs px-3 py-1 rounded-full text-blue-400 font-semibold border border-blue-500/20">
+                Google X Kaggle Pro
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Live Grid -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+        
+        <!-- Left Column: Parameters & Document Preview (4 cols) -->
+        <section class="lg:col-span-4 flex flex-col space-y-6">
+            <div class="glass-panel rounded-2xl p-5 shadow-sm glow-blue">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-sliders text-blue-500 mr-2"></i> Audit Parameters Sandbox
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Supplier / Vendor Name</label>
+                        <input id="vendor-input" type="text" value="Apex Manufacturing Inc." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Base Invoice Amount (USD)</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-2 text-slate-500 text-sm">$</span>
+                            <input id="invoice-input" type="number" value="12000" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Contract Tariff (%)</label>
+                            <input id="contract-rate" type="number" step="0.1" value="5.0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Receipt Tariff (%)</label>
+                            <input id="receipt-rate" type="number" step="0.1" value="8.0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Expected Pallet Size (Units)</label>
+                        <input id="pallet-units" type="number" value="600" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-6">
+                    <button id="init-btn" class="bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-slate-300 py-2.5 px-3 rounded-xl font-semibold text-xs border border-slate-700 transition cursor-pointer flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-wrench"></i>
+                        <span>Apply Sandbox</span>
+                    </button>
+                    <button id="run-agent-btn" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white py-2.5 px-3 rounded-xl font-semibold text-xs shadow-lg shadow-blue-500/10 flex items-center justify-center space-x-1.5 transition cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Run Audit Agent</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Documents Sandbox (Previews) -->
+            <div class="glass-panel border border-slate-800 rounded-2xl p-5 flex-1 flex flex-col">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center justify-between">
+                    <span class="flex items-center"><i class="fa-solid fa-folder-open text-blue-500 mr-2"></i> Documents Sandbox</span>
+                    <button id="refresh-docs-btn" class="text-xs text-slate-500 hover:text-slate-300"><i class="fa-solid fa-rotate"></i></button>
+                </h2>
+
+                <div class="space-y-4 flex-1 flex flex-col justify-between">
+                    <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                            <span class="font-semibold text-slate-300 flex items-center">
+                                <i class="fa-regular fa-file-lines text-blue-400 mr-1.5 text-sm"></i> vendor_contract.txt
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Sec. 4.2 Tariff Target</span>
+                        </div>
+                        <p id="contract-file-content" class="text-slate-400 leading-relaxed font-mono whitespace-pre-line text-[10px]">
+                            Contract parameters will appear here. Press Apply Sandbox to update.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 text-slate-900 shadow-inner relative overflow-hidden flex-1 flex flex-col justify-center min-h-[140px]">
+                        <div class="absolute top-0 right-0 bg-red-500 text-white font-mono text-[9px] px-2 py-0.5 rounded-bl font-semibold uppercase tracking-wider">
+                            Receipt OCR
+                        </div>
+                        <div class="border-b border-slate-200 pb-2 mb-2">
+                            <h3 class="font-bold text-xs uppercase tracking-tight text-slate-800">Customs Receipt & Duty Clearance</h3>
+                            <p class="text-[9px] text-slate-500">Ref: APEX-PORT-ID90</p>
+                        </div>
+                        <div class="space-y-1 font-mono text-[11px] text-slate-700">
+                            <div><strong class="text-slate-900">Declared Quantity:</strong> <span id="receipt-units-preview">600</span> Units</div>
+                            <div class="flex items-center justify-between">
+                                <div><strong class="text-slate-900">Applied Tariff:</strong> <span id="receipt-rate-preview" class="text-red-600 font-bold bg-red-50 px-1 rounded">8.0%</span></div>
+                                <span class="text-[9px] text-emerald-600 font-semibold border border-emerald-500/20 px-1 rounded bg-emerald-50">STAMPED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center Column: Core Workflow Lifecycle & Python Sandbox Output (5 cols) -->
+        <section class="lg:col-span-5 flex flex-col space-y-6">
+            <div class="glass-panel rounded-2xl p-5 shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-network-wired text-blue-500 mr-2"></i> Agentic Core Workflow
+                </h2>
+
+                <div class="space-y-3">
+                    <div id="step-1" class="flex items-start space-x-3 p-3 rounded-xl transition border border-transparent">
+                        <div class="step-icon w-6 h-6 rounded-lg bg-slate-850 border border-slate-700 text-xs font-bold text-slate-400 flex items-center justify-center shrink-0">1</div>
+                        <div>
+                            <h3 class="text-xs font-semibold text-slate-200">Phase 1: Multimodal OCR Parse</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Ingests physical customs receipt image and contract txt via Gemini multimodal SDK.</p>
+                        </div>
+                    </div>
+                    <div id="step-2" class="flex items-start space-x-3 p-3 rounded-xl transition border border-transparent">
+                        <div class="step-icon w-6 h-6 rounded-lg bg-slate-850 border border-slate-700 text-xs font-bold text-slate-400 flex items-center justify-center shrink-0">2</div>
+                        <div>
+                            <h3 class="text-xs font-semibold text-slate-200">Phase 2: Discrepancy Analysis</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Automates mapping parameters and registers discrepancy details.</p>
+                        </div>
+                    </div>
+                    <div id="step-3" class="flex items-start space-x-3 p-3 rounded-xl transition border border-transparent">
+                        <div class="step-icon w-6 h-6 rounded-lg bg-slate-850 border border-slate-700 text-xs font-bold text-slate-400 flex items-center justify-center shrink-0">3</div>
+                        <div>
+                            <h3 class="text-xs font-semibold text-slate-200">Phase 3: Python Tool Execution</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Executes math securely in the Gemini Python sandbox to prevent LLM hallucination.</p>
+                        </div>
+                    </div>
+                    <div id="step-4" class="flex items-start space-x-3 p-3 rounded-xl transition border border-transparent">
+                        <div class="step-icon w-6 h-6 rounded-lg bg-slate-850 border border-slate-700 text-xs font-bold text-slate-400 flex items-center justify-center shrink-0">4</div>
+                        <div>
+                            <h3 class="text-xs font-semibold text-slate-200">Phase 4: Database Update & Escalation</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Updates the ERP ledger, locks payment, and drafts a vendor breach dispute letter.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal output stream -->
+            <div class="glass-panel rounded-2xl flex-1 flex flex-col overflow-hidden shadow-inner min-h-[220px]">
+                <div class="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="text-[11px] text-slate-400 font-semibold ml-2 flex items-center font-mono">
+                            <i class="fa-solid fa-terminal mr-1.5"></i> gemini_sandbox_terminal
+                        </span>
+                    </div>
+                    <span class="text-[9px] text-blue-400 font-mono bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">Python 3.10 Execution</span>
+                </div>
+                <div id="terminal-screen" class="p-4 flex-1 overflow-y-auto code-font text-xs text-emerald-400 space-y-2 leading-relaxed bg-black/40">
+                    <div class="text-slate-500">// Command Center ready. Establish sandbox variables or start audit execution.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: ERP Ledger Database & Dispute Escalation Output (3 cols) -->
+        <section class="lg:col-span-3 flex flex-col space-y-6">
+            <div class="glass-panel rounded-2xl p-5 shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-database text-blue-500 mr-2"></i> ERP Relational Database
+                </h2>
+                <div class="border border-slate-800 rounded-xl overflow-hidden text-xs bg-slate-950/50">
+                    <div class="bg-slate-950 border-b border-slate-800 p-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider flex justify-between items-center">
+                        <span>TXN-2026-001 Ledger Record</span>
+                        <span class="text-[8px] text-blue-400 font-mono bg-blue-950 border border-blue-800 px-1.5 rounded">Active</span>
+                    </div>
+                    <div class="p-3 space-y-2.5">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Vendor:</span>
+                            <span id="ledger-vendor" class="font-semibold text-slate-200">Apex Manufacturing</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Audited Value:</span>
+                            <span id="ledger-val" class="font-semibold text-slate-200">$12,000.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Audit Status:</span>
+                            <span id="ledger-status" class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 uppercase">PENDING</span>
+                        </div>
+                        <div class="border-t border-slate-800 pt-2 flex flex-col space-y-1">
+                            <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Discrepancy Details</span>
+                            <p id="ledger-issue" class="text-slate-400 font-mono text-[10px] italic">None</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escalation draft outputs -->
+            <div class="glass-panel border border-slate-800 rounded-2xl p-5 flex-1 flex flex-col shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center font-mono">
+                        <i class="fa-solid fa-envelope-open-text text-blue-500 mr-2"></i> Escalation draft
+                    </h2>
+                    <button id="copy-email" class="text-[10px] text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1 border border-blue-500/10 px-2 py-1 rounded bg-blue-500/5 transition">
+                        <i class="fa-regular fa-copy"></i> <span>Copy</span>
+                    </button>
+                </div>
+                <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex-1 overflow-y-auto text-xs text-slate-400 flex flex-col max-h-[220px] lg:max-h-none">
+                    <div id="email-subject" class="font-semibold text-slate-300 border-b border-slate-800 pb-2 mb-2 text-[10px]">
+                        Subject: (Dispute details pending audit execution)
+                    </div>
+                    <div id="email-body" class="whitespace-pre-line leading-relaxed font-mono flex-1 overflow-y-auto text-[10px] text-slate-400">
+                        Dispute output will render automatically after python calculations have run.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- UI Integration Script -->
+    <script>
+        const API_URL = "http://localhost:8000";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const initBtn = document.getElementById('init-btn');
+            const runBtn = document.getElementById('run-agent-btn');
+            const term = document.getElementById('terminal-screen');
+            const refreshDocsBtn = document.getElementById('refresh-docs-btn');
+
+            const vendorInput = document.getElementById('vendor-input');
+            const invoiceInput = document.getElementById('invoice-input');
+            const contractRate = document.getElementById('contract-rate');
+            const receiptRate = document.getElementById('receipt-rate');
+            const palletUnits = document.getElementById('pallet-units');
+
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+
+            const receiptUnitsPreview = document.getElementById('receipt-units-preview');
+            const receiptRatePreview = document.getElementById('receipt-rate-preview');
+
+            const logLine = (msg, type = 'info') => {
+                const colors = {
+                    info: 'text-slate-400',
+                    success: 'text-emerald-400',
+                    warning: 'text-yellow-400',
+                    error: 'text-red-400',
+                    code: 'text-blue-300 font-semibold'
+                };
+                const line = document.createElement('div');
+                line.className = `${colors[type]} leading-relaxed font-mono mb-1`;
+                line.innerHTML = msg;
+                term.appendChild(line);
+                term.scrollTop = term.scrollHeight;
+            };
+
+            // Check connection to backend
+            const checkConnection = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/api/state`);
+                    if (res.ok) {
+                        statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                        statusText.innerText = "FastAPI Backend Connected";
+                        updateState(await res.json());
+                    } else {
+                        throw new Error("API Offline");
+                    }
+                } catch (e) {
+                    statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                    statusText.innerText = "Offline - Run uvicorn server";
+                    logLine("⚠️ Warning: Failed to connect to FastAPI backend on http://localhost:8000. Start the uvicorn server to test integration.", "error");
+                }
+            };
+
+            const updateState = (state) => {
+                if (state.contract) {
+                    document.getElementById('contract-file-content').innerText = state.contract;
+                }
+                
+                if (state.ledger && state.ledger.Transaction_ID) {
+                    document.getElementById('ledger-vendor').innerText = state.ledger.Vendor || "Apex Manufacturing";
+                    document.getElementById('ledger-val').innerText = `$${parseFloat(state.ledger.Invoice_Amount_USD || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                    
+                    const status = state.ledger.Audit_Status || "PENDING";
+                    const statusElem = document.getElementById('ledger-status');
+                    statusElem.innerText = status;
+                    if (status.includes("HOLD") || status.includes("DISPUTED")) {
+                        statusElem.className = "px-2 py-0.5 text-[9px] font-bold rounded-full bg-red-500/10 text-red-500 border border-red-500/20 uppercase";
+                    } else if (status.includes("PASS")) {
+                        statusElem.className = "px-2 py-0.5 text-[9px] font-bold rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase";
+                    } else {
+                        statusElem.className = "px-2 py-0.5 text-[9px] font-bold rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 uppercase";
+                    }
+                    
+                    document.getElementById('ledger-issue').innerText = state.ledger.Flagged_Issues || "None";
+                }
+                
+                if (state.email_draft) {
+                    const lines = state.email_draft.split('\n');
+                    const subjectLine = lines.find(line => line.toLowerCase().startsWith('subject:'));
+                    if (subjectLine) {
+                        document.getElementById('email-subject').innerText = subjectLine;
+                        document.getElementById('email-body').innerText = lines.filter(line => !line.toLowerCase().startsWith('subject:')).join('\n').trim();
+                    } else {
+                        document.getElementById('email-subject').innerText = "Subject: Billing Discrepancy Notification";
+                        document.getElementById('email-body').innerText = state.email_draft;
+                    }
+                }
+
+                receiptUnitsPreview.innerText = palletUnits.value;
+                receiptRatePreview.innerText = `${parseFloat(receiptRate.value).toFixed(1)}%`;
+                if (parseFloat(contractRate.value) !== parseFloat(receiptRate.value)) {
+                    receiptRatePreview.className = "text-red-600 font-bold bg-red-50 px-1 rounded";
+                } else {
+                    receiptRatePreview.className = "text-emerald-600 font-bold bg-emerald-50 px-1 rounded";
+                }
+            };
+
+            initBtn.addEventListener('click', async () => {
+                initBtn.disabled = true;
+                try {
+                    logLine(`⚙️ [Config] Updating sandbox files for vendor: ${vendorInput.value}...`, 'info');
+                    const res = await fetch(`${API_URL}/api/initialize`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            vendor: vendorInput.value,
+                            invoice_amount: parseFloat(invoiceInput.value),
+                            contract_tariff: parseFloat(contractRate.value),
+                            receipt_tariff: parseFloat(receiptRate.value),
+                            expected_units: parseInt(palletUnits.value)
+                        })
+                    });
+                    
+                    if (res.ok) {
+                        logLine("✅ Sandbox mock documents successfully updated and written to disk.", "success");
+                        // Refresh state
+                        const stateRes = await fetch(`${API_URL}/api/state`);
+                        if (stateRes.ok) {
+                            updateState(await stateRes.json());
+                        }
+                    } else {
+                        const err = await res.json();
+                        logLine(`❌ Initialization Failed: ${err.detail}`, 'error');
+                    }
+                } catch (e) {
+                    logLine(`❌ Connection Error: Backend server is offline.`, 'error');
+                } finally {
+                    initBtn.disabled = false;
+                }
+            });
+
+            runBtn.addEventListener('click', async () => {
+                runBtn.disabled = true;
+                runBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                term.innerHTML = '';
+
+                // Reset phase highlights
+                document.querySelectorAll('[id^="step-"]').forEach(el => el.className = "flex items-start space-x-3 p-3 rounded-xl transition border border-transparent");
+
+                try {
+                    // Phase 1
+                    document.getElementById('step-1').classList.add('bg-blue-500/10', 'border-blue-500/20');
+                    logLine('🤖 [Ingestion] Launching multimodal client pipelines...', 'info');
+                    logLine('📸 loading custom_receipt.png and vendor_contract.txt to memory buffer...', 'info');
+                    
+                    const res = await fetch(`${API_URL}/api/run-audit`, { method: 'POST' });
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.detail || "Audit execution failed");
+                    }
+                    
+                    const data = await res.json();
+                    
+                    logLine(`📝 Gemini OCR successfully extracted vendor: <strong>${data.extracted_data.vendor_name}</strong>`, 'success');
+                    logLine(`- Extracted Contract rate: ${data.extracted_data.contract_tariff_rate_pct}%`, 'success');
+                    logLine(`- Extracted Receipt rate: ${data.extracted_data.receipt_tariff_rate_pct}%`, 'success');
+                    
+                    // Phase 2
+                    document.getElementById('step-1').className = "flex items-start space-x-3 p-3 rounded-xl transition border border-transparent";
+                    document.getElementById('step-2').classList.add('bg-blue-500/10', 'border-blue-500/20');
+                    
+                    if (data.discrepancy_detected) {
+                        logLine(`⚠️ Discrepancy Found: Tariff rates mismatch detected. Planning verification...`, 'warning');
+                    } else {
+                        logLine(`✅ Parameter Match: Extracted rates align perfectly with contract terms.`, 'success');
+                    }
+                    
+                    // Phase 3
+                    document.getElementById('step-2').className = "flex items-start space-x-3 p-3 rounded-xl transition border border-transparent";
+                    document.getElementById('step-3').classList.add('bg-blue-500/10', 'border-blue-500/20');
+                    logLine('🤖 [Verification] Spinning up Gemini Python Sandbox Executor...', 'info');
+                    
+                    // Render code logs from backend
+                    if (data.code_logs && data.code_logs.length > 0) {
+                        data.code_logs.forEach(log => {
+                            if (log.type === 'code') {
+                                logLine(`>>> Running sandbox calculation script:\n${log.content}`, 'code');
+                            } else if (log.type === 'output') {
+                                logLine(`[Execution Output]:\n${log.content}`, 'success');
+                            }
+                        });
+                    } else {
+                        logLine('>>> Fallback: Calculated overcharge directly...', 'code');
+                    }
+                    
+                    // Phase 4
+                    document.getElementById('step-3').className = "flex items-start space-x-3 p-3 rounded-xl transition border border-transparent";
+                    document.getElementById('step-4').classList.add('bg-blue-500/10', 'border-blue-500/20');
+                    logLine('🤖 [Escalation] Writing updates to relational database...', 'info');
+                    
+                    updateState({
+                        ledger: data.ledger,
+                        email_draft: data.email_draft
+                    });
+                    
+                    logLine('📧 Dispute email drafted and saved to disk.', 'success');
+                    logLine('🏁 [Complete] Compliance agent audit loop finished successfully.', 'success');
+                    
+                } catch (e) {
+                    logLine(`❌ Audit Error: ${e.message}`, 'error');
+                } finally {
+                    document.getElementById('step-4').className = "flex items-start space-x-3 p-3 rounded-xl transition border border-transparent";
+                    runBtn.disabled = false;
+                    runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            });
+
+            refreshDocsBtn.addEventListener('click', checkConnection);
+
+            document.getElementById('copy-email').addEventListener('click', () => {
+                const sub = document.getElementById('email-subject').innerText;
+                const body = document.getElementById('email-body').innerText;
+                const dummy = document.createElement('textarea');
+                document.body.appendChild(dummy);
+                dummy.value = `${sub}\n\n${body}`;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+
+                const copyBtn = document.getElementById('copy-email');
+                copyBtn.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <span>Copied!</span>`;
+                setTimeout(() => {
+                    copyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> <span>Copy</span>`;
+                }, 2000);
+            });
+
+            checkConnection();
+        });
+    </script>
+</body>
+</html>
